@@ -21,7 +21,7 @@ The pre auth key resource allows you to create a pre auth key that can be used t
 
 ### Optional
 
-- `acl_tags` (List of String) ACL tags on the pre auth key.
+- `acl_tags` (Set of String) ACL tags on the pre auth key.
 - `ephemeral` (Boolean) Define pre auth key as ephemeral
 - `expiration` (String) expiration of pre auth key
 - `expired` (Boolean) expiration of pre auth key

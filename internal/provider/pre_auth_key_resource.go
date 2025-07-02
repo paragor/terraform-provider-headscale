@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,8 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -47,7 +47,7 @@ type PreAuthKeyResourceModel struct {
 	Reusable  types.Bool   `tfsdk:"reusable"`
 	Ephemeral types.Bool   `tfsdk:"ephemeral"`
 	Ttl       types.String `tfsdk:"ttl"`
-	ACLTags   types.List   `tfsdk:"acl_tags"`
+	ACLTags   types.Set    `tfsdk:"acl_tags"`
 
 	Expired types.Bool `tfsdk:"expired"`
 
@@ -109,17 +109,16 @@ func (r *PreAuthKeyResource) Schema(ctx context.Context, req resource.SchemaRequ
 					stringvalidator.RegexMatches(regexp.MustCompile(`^\d+(ns|us|µs|ms|s|m|h)$`), `Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h"`),
 				},
 			},
-			"acl_tags": schema.ListAttribute{
+			"acl_tags": schema.SetAttribute{
 				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
 				Description: "ACL tags on the pre auth key.",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.RequiresReplace(),
 				},
-				Validators: []validator.List{
-					listvalidator.UniqueValues(),
-					listvalidator.ValueStringsAre(
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
 						stringvalidator.RegexMatches(regexp.MustCompile(`tag:[\w-]+`), "tag must follow scheme of `tag:<value>`"),
 					),
 				},
@@ -267,7 +266,7 @@ func (r *PreAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 	data.Ephemeral = types.BoolValue(preAuthKey.GetEphemeral())
 
 	preAuthKey.GetAclTags()
-	aclTags, diags := types.ListValueFrom(ctx, types.StringType, preAuthKey.GetAclTags())
+	aclTags, diags := types.SetValueFrom(ctx, types.StringType, preAuthKey.GetAclTags())
 	resp.Diagnostics.Append(diags...)
 	data.ACLTags = aclTags
 
