@@ -4,9 +4,14 @@ Terraform provider for [Headscale](https://headscale.net/stable/).
 
 Provide resources via grpc protocol. See [grpc_listen_addr](https://github.com/juanfont/headscale/blob/v0.26.1/config-example.yaml#L33)
 
-# 
+## Supported versions
 
-# TLS proxy
+| provider version | headscale version |
+|------------------|-------------------|
+| v0.1.x           | v0.26.1           |
+
+
+## TLS proxy
 For better security highly recommend to use proxy with mtls and stay headscale use 127.0.0.1 as host network. 
 
 `! Danger !` access via socket to headscale give you admin access without any token check
